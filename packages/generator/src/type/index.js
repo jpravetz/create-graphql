@@ -20,6 +20,11 @@ class TypeGenerator extends Generator {
       required: false,
     });
 
+    this.argument('template', {
+      type: String,
+      required: true,
+    });
+
     this.destinationDir = getConfigDir('type');
   }
 
@@ -33,6 +38,9 @@ class TypeGenerator extends Generator {
       : null;
 
     const directories = this._getConfigDirectories();
+
+    const templateDir = Path.resolve(__dirname,'../../templates',this.options.template)
+    this.sourceRoot(templateDir);
 
     const name = uppercaseFirstLetter(this.options.name);
     const typeFileName = `${name}Type`;

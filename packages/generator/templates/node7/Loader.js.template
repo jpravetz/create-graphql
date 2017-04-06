@@ -1,8 +1,8 @@
 // @flow
 
-import DataLoader from 'dataloader';
-import ConnectionFromMongoCursor from '<%= directories.connection %>/ConnectionFromMongoCursor';
-import <%= name %>Model from '<%= directories.model %>/<%= name %>';
+const DataLoader = require('dataloader');
+const ConnectionFromMongoCursor = require('<%= directories.connection %>/ConnectionFromMongoCursor');
+const <%= name %>Model = require('<%= directories.model %>/<%= name %>)';
 
 type <%= name %>Type = {
   id: string,
@@ -10,10 +10,7 @@ type <%= name %>Type = {
   exampleField: string,
 }
 
-export default class <%= name %> {
-  id: string;
-  _id: string;
-  exampleField: string;
+module.exports = class <%= name %> {
 
   static <%= rawName %>Loader = new DataLoader(
     ids => Promise.all(
@@ -23,7 +20,7 @@ export default class <%= name %> {
     ),
   );
 
-  constructor(data: <%= name %>Type) {
+  constructor(data) {
     this.id = data.id;
     this._id = data._id;
     this.exampleField = data.exampleField;

@@ -21,6 +21,11 @@ class MutationGenerator extends Generator {
       required: false,
     });
 
+    this.argument('template', {
+      type: String,
+      required: true,
+    });
+
     this.destinationDir = getConfigDir('mutation');
   }
 
@@ -77,6 +82,9 @@ class MutationGenerator extends Generator {
     }
 
     const name = uppercaseFirstLetter(this.options.name);
+
+    const templateDir = Path.resolve(__dirname,'../../templates',this.options.template)
+    this.sourceRoot(templateDir);
 
     const mutations = {
       add: {
