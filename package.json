@@ -41,8 +41,8 @@
     "url": "https://github.com/jpravetz/create-graphql"
   },
   "scripts": {
-    "build": "npm run clean && babel src -d ./dist ./src --copy-files --ignore *.spec.js",
-    "clean": "rimraf ./generators",
+    "build": "npm run clean && babel src -d ./dist --copy-files --ignore *.spec.js",
+    "clean": "rimraf ./dist",
     "test": "jest",
     "watch": "babel -w -d ./src --copy-files"
   }

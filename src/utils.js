@@ -8,6 +8,7 @@ const { visit } = recast.types;
 
 const rootPath = pkgDir.sync('.') || '.';
 
+
 /**
  * Uppercase the first letter of a text
  * @param text {string}
@@ -263,12 +264,22 @@ export const getCreateGraphQLConfig = () => {
   }
 };
 
+export const getConfigDir = directory => getCreateGraphQLConfig().directories[directory];
+
+let templateDir;
 /**
  * Get a directory from the configuration file
  * @param directory {string} The name of the directory, e.g. 'source'/'mutation'
  * @returns {string} The directory path
  */
-export const getConfigDir = directory => getCreateGraphQLConfig().directories[directory];
+export const getTemplatePath = (filename) => {
+  console.log(path.resolve(templateDir,filename))
+  return path.resolve(templateDir,filename);
+}
+
+export const setTemplateDir = (directory) => {
+  templateDir = directory;
+}
 
 /**
  * Get the relative path directory between two directories specified on the config file

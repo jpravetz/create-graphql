@@ -12,6 +12,10 @@ import { verifyYeoman } from './utils_create';
 program
   .version(pkg.version);
 
+import Path from 'path';
+
+let templatePath = Path.resolve(__dirname,'../templates','es2015');
+
 program
   .command('init <project>')
   .alias('i')
@@ -25,6 +29,7 @@ program
 program
   .command('generate <name>')
   .alias('g')
+  .option('-T, --templates <path>', `Path to template files (default: ${templatePath}`, templatePath )
   .option('-t, --type', 'Generate a new Type')
   .option('-l, --loader', 'Generate a new Loader')
   .option('-c, --connection', 'Generate a new Connection')

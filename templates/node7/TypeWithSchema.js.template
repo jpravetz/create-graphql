@@ -1,0 +1,34 @@
+// @flow
+
+const graphql = require('graphql');
+const GraphQLObjectType = graphql.GraphQLObjectType;
+const GraphQLString = graphql.GraphQLString;
+const globalIdField = require('graphql-relay').globalIdField;
+const NodeInterface = require('<%= directories.interface %>/NodeInterface').NodeInterface;
+
+<%_ for (i in schema.dependencies) { -%>
+const <%= schema.dependencies[i] %> = graphql.<%= schema.dependencies[i] %>
+<%_ } -%>
+
+<%_ for (i in schema.typeDependencies) { -%>
+const <%= schema.typeDependencies[i] %> = requires('<%= directories.type %>/<%=schema.typeDependencies[i]%>');
+<%_ } -%>
+<%_ for (i in schema.loaderDependencies) { -%>
+const <%= schema.loaderDependencies[i] %> = requires('<%= directories.type %>/<%=schema.loaderDependencies[i]%>');
+<%_ } -%>
+
+module.exports = new GraphQLObjectType({
+  name: '<%= name %>',
+  description: 'Represents <%= name %>',
+  fields: () => ({
+    id: globalIdField('<%= name %>'),
+    <%_ for (field of schema.fields) { -%>
+    <%- field.name %>: {
+      type: <%= field.type %>,
+      description: '<%= field.description %>',
+      resolve: <%if(field.resolveArgs){%><%=field.resolveArgs%><%}else{ %>obj<%} %> => <%= field.resolve %>,
+    },
+    <%_ } -%>
+  }),
+  interfaces: () => [NodeInterface],
+});

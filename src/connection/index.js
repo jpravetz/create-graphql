@@ -1,6 +1,7 @@
 import Generator from 'yeoman-generator';
 import {
   getConfigDir,
+  getTemplatePath,
   getRelativeConfigDir,
   uppercaseFirstLetter,
 } from '../utils';
@@ -18,16 +19,20 @@ class ConnectionGenerator extends Generator {
   }
 
   generateConnection() {
+    console.log('hello')
     const name = uppercaseFirstLetter(this.options.name);
 
     const directories = getRelativeConfigDir('connection', ['type']);
 
-    const templatePath = this.templatePath('Connection.js.template');
+    const templatePath = this.templatePath(getTemplatePath('Connection.js.template'));
+    console.log(`template is ${templatePath}`);
     const destinationPath = this.destinationPath(`${this.destinationDir}/${name}Connection.js`);
     const templateVars = {
       name,
       directories,
     };
+
+    console.log(templatePath)
 
     this.fs.copyTpl(templatePath, destinationPath, templateVars);
   }
