@@ -8,6 +8,13 @@ import {
   generate,
 } from './commands';
 import { verifyYeoman } from './utils';
+import Path from 'path';
+import fs from 'fs';
+
+const templateDir = Path.resolve(__dirname,'../../generator/templates');
+const templates = fs.readdirSync(templateDir);
+const template = 'es2015';
+
 
 program
   .version(pkg.version);
@@ -30,6 +37,7 @@ program
   .option('-c, --connection', 'Generate a new Connection')
   .option('-m, --mutation', 'Generate a new Mutation')
   .option('--schema <modelPath>', 'Generate from a Mongoose Schema')
+  .option('-T --template <name>',`Target node version from ${templates} (default ${template})`, template)
   .description('Generate a new file (Type, Loader, Mutation, etc)')
   .action(async (name, options) => {
     await verifyYeoman();

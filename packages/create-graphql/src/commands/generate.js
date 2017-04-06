@@ -39,6 +39,8 @@ function parseOptions(opts) {
 }
 
 function generate(name, options) {
+  const template = options.template || 'es2015';
+  
   // Parse all arguments
   const parsedOptions = parseOptions(options);
   // Get only the chose arguments
@@ -47,7 +49,7 @@ function generate(name, options) {
   // Check if schema argument has been passed
   const schemaIndex = chosenOptions.indexOf('schema');
   chosenOptions.forEach(async (option) => {
-    const payload = [`graphql:${option}`, name];
+    const payload = [`graphql:${option}`, name, template];
 
     // If argument schema exists
     if (schemaIndex !== -1) {

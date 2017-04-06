@@ -1,0 +1,63 @@
+// @flow
+
+import {
+  GraphQLString,
+  GraphQLNonNull,
+} from 'graphql';
+import {
+  mutationWithClientMutationId,
+  toGlobalId,
+} from 'graphql-relay';
+
+import <%= name %> from '<%= directories.model %>/<%= name %>';
+
+import <%= name %>Loader from '<%= directories.loader %>/<%= name %>Loader';
+import <%= name %>Connection from '<%= directories.connection %>/<%= name %>Connection';
+
+export default mutationWithClientMutationId({
+  name: '<%= name %>Add',
+  inputFields: {
+    example: {
+      type: new GraphQLNonNull(GraphQLString),
+      description: 'My example field',
+    },
+  },
+  mutateAndGetPayload: async ({ example }, { user }) => {
+    // Verify if user is authorized
+    if (!user) {
+      throw new Error('Unauthorized user');
+    }
+
+    // TODO: mutation logic
+
+    return {
+      // id: id, // ID of the newly created row
+      error: null,
+    };
+  },
+  outputFields: {
+    <%= camelCaseName %>Edge: {
+      type: <%= name %>Connection.edgeType,
+      resolve: async ({ id }, args, { user }) => {
+        // Load new edge from loader
+        const <%= camelCaseName %> = await <%= name %>Loader.load(
+          user, id,
+        );
+
+        // Returns null if no node was loaded
+        if (!<%= camelCaseName %>) {
+          return null;
+        }
+
+        return {
+          cursor: toGlobalId('<%= name %>', <%= camelCaseName %>),
+          node: <%= camelCaseName %>,
+        };
+      },
+    },
+    error: {
+      type: GraphQLString,
+      resolve: ({ error }) => error,
+    },
+  },
+});

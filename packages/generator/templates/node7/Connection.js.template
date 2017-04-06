@@ -1,0 +1,10 @@
+// @flow
+
+const connectionDefinitions = require('graphql-relay').connectionDefinitions;
+
+const <%= name %>Type = require('<%= directories.type %>/<%= name %>Type');
+
+module.exports = connectionDefinitions({
+  name: '<%= name %>',
+  nodeType: <%= name %>Type,
+});

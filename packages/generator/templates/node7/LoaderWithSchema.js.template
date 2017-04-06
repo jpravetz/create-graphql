@@ -1,0 +1,66 @@
+// @flow
+
+import DataLoader from 'dataloader';
+import ConnectionFromMongoCursor from '<%= directories.connection %>/ConnectionFromMongoCursor';
+import <%= name %>Model from '<%= directories.model %>/<%= name %>';
+
+type <%= name %>Type = {
+  id: string,
+  _id: string,
+  <%_ for (field of schema.fields) { -%>
+  <%- field.name + ': ' + field.flowType -%>,
+  <%_ } -%>
+}
+
+export default class <%= name %> {
+  id: string;
+  _id: string;
+  <%_ for (field of schema.fields) { -%>
+  <%- field.name + ': ' + field.flowType -%>;
+  <%_ } -%>
+
+  static <%= rawName %>Loader = new DataLoader(
+    ids => Promise.all(
+      ids.map(id =>
+        <%= name %>Model.findOne({ _id: id })
+      ),
+    ),
+  );
+
+  constructor(data: <%= name %>Type) {
+    this.id = data.id;
+    this._id = data._id;
+    <%_ for (field of schema.fields) { -%>
+    this.<%- field.name -%> = data.<%- field.name -%>;
+    <%_ } -%>
+  }
+
+  static viewerCanSee(viewer, data) {
+    // TODO: handle security
+
+    return true;
+  }
+
+  static async load(viewer, id) {
+    if (!id) {
+      return null;
+    }
+
+    const data = await <%= name %>.<%= rawName %>Loader.load(id.toString());
+
+    return <%= name %>.viewerCanSee(viewer, data) ? new <%= name %>(data) : null;
+  }
+
+  static clearCache(id) {
+    return <%= name %>.<%= rawName %>Loader.clear(id.toString());
+  }
+
+  static async load<%= pluralName %>(viewer, args) {
+    // TODO: specify conditions
+    const <%= pluralCamelCaseName %> = <%= name %>Model.find({});
+
+    return ConnectionFromMongoCursor.connectionFromMongoCursor(
+      viewer, <%= pluralCamelCaseName %>, args, <%= name %>.load,
+    );
+  }
+}

@@ -1,0 +1,69 @@
+// @flow
+
+import {
+  GraphQLID,
+  GraphQLString,
+  GraphQLNonNull,
+} from 'graphql';
+import {
+  mutationWithClientMutationId,
+  fromGlobalId,
+} from 'graphql-relay';
+
+import <%= name %> from '<%= directories.model %>/<%= name %>';
+
+import <%= name %>Type from '<%= directories.type %>/<%= name %>Type';
+import <%= name %>Loader from '<%= directories.loader %>/<%= name %>Loader';
+
+export default mutationWithClientMutationId({
+  name: '<%= name %>Edit',
+  inputFields: {
+    id: {
+      type: new GraphQLNonNull(GraphQLID),
+    },
+    example: {
+      type: GraphQLString,
+    },
+  },
+  mutateAndGetPayload: async (args, { user }) => {
+    // Verify if user is authorized
+    if (!user) {
+      throw new Error('Unauthorized user');
+    }
+
+    const {
+      id,
+      example,
+    } = args;
+
+    // Check if the provided ID is valid
+    const <%= camelCaseName %> = await <%= name %>.findOne({
+      _id: fromGlobalId(id).id,
+    });
+
+    // If not, throw an error
+    if (!<%= camelCaseName %>) {
+      throw new Error('Invalid <%= camelCaseName %>Id');
+    }
+
+    // TODO: mutation logic
+
+    // Clear dataloader cache
+    <%= name %>Loader.clearCache(<%= camelCaseName %>._id);
+
+    return {
+      id: <%= camelCaseName %>._id,
+      error: null,
+    };
+  },
+  outputFields: {
+    <%= camelCaseName %>: {
+      type: <%= name %>Type,
+      resolve: (obj, args, { user }) => <%= name %>Loader.load(user, obj.id),
+    },
+    error: {
+      type: GraphQLString,
+      resolve: ({ error }) => error,
+    },
+  },
+});
