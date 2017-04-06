@@ -7,7 +7,7 @@ import {
   init,
   generate,
 } from './commands';
-import { verifyYeoman } from './utils';
+import { verifyYeoman } from './utils_create';
 
 program
   .version(pkg.version);

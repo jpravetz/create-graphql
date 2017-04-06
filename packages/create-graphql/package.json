@@ -24,17 +24,6 @@
   },
   "devDependencies": {},
   "homepage": "https://github.com/lucasbento/create-graphql#readme",
-  "keywords": [
-    "apollo",
-    "create",
-    "generator",
-    "graphql",
-    "koa",
-    "relay",
-    "server",
-    "yeoman",
-    "yo"
-  ],
   "license": "MIT",
   "preferGlobal": true,
   "repository": {

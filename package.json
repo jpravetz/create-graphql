@@ -1,39 +1,47 @@
 {
-  "license": "MIT",
+  "name": "create-graphql",
+  "description": "Create production-ready GraphQL schema",
+  "version": "1.1.16",
   "author": {
     "name": "Lucas Bento",
     "email": "lucas.bsilva@outlook.com",
     "url": "https://github.com/lucasbento"
   },
+  "bugs": "https://github.com/jpravetz/create-graphql/issues",
+  "dependencies": {
+    "babel-polyfill": "^6.20.0",
+    "babylon": "^6.14.1",
+    "chalk": "^1.1.3",
+    "colors": "^1.1.2",
+    "lodash.merge": "^4.6.0",
+    "ora": "^1.2.0",
+    "pkg-dir": "^1.0.0",
+    "pluralize": "^4.0.0",
+    "ramda": "^0.23.0",
+    "recast": "^0.12.2",
+    "semver": "^5.1.0",
+    "yeoman-generator": "^1.0.1",
+    "commander": "^2.9.0",
+    "cross-spawn": "^5.0.1",
+    "cross-spawn-promise": "^0.10.1",
+    "shelljs": "^0.7.5",
+    "yo": "^1.8.5"
+  },
   "devDependencies": {
     "babel-cli": "^6.24.0",
-    "babel-core": "^6.24.0",
-    "babel-eslint": "^7.2.1",
-    "babel-jest": "^19.0.0",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-rewire": "^1.0.0",
-    "babel-preset-es2015": "^6.24.0",
-    "babel-preset-stage-0": "^6.22.0",
-    "chokidar": "^1.6.1",
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb": "^14.1.0",
-    "eslint-plugin-import": "^2.2.0",
-    "fs-extra": "^2.1.2",
-    "jest": "^19.0.2",
-    "jest-cli": "^19.0.2",
-    "lerna": "2.0.0-beta.38",
-    "lerna-changelog": "^0.4.0",
-    "rimraf": "^2.6.1",
-    "yeoman-assert": "^3.0.0",
-    "yeoman-test": "^1.6.0"
+    "babel-preset-env": "^1.3.2"
+  },
+  "homepage": "https://github.com/jpravetz/create-graphql#readme",
+  "license": "MIT",
+  "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpravetz/create-graphql"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "build": "lerna exec -- npm run build",
-    "clean": "lerna clean",
-    "lint": "eslint \"packages/*/src/**/*.js\" \"packages/*/__tests__\"",
-    "prepublish": "npm run build",
-    "test": "jest --config jest.json",
-    "watch": "lerna exec -- npm run watch"
+    "build": "npm run clear && babel -d ./generators ./src --copy-files --ignore *.spec.js",
+    "clear": "rimraf ./generators",
+    "test": "jest",
+    "watch": "babel -w -d ./src --copy-files"
   }
 }
