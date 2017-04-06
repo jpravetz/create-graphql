@@ -273,7 +273,7 @@ let templateDir;
  * @returns {string} The directory path
  */
 export const getTemplatePath = (filename) => {
-  console.log(path.resolve(templateDir,filename))
+  console.log('Template path ' + path.resolve(templateDir,filename))
   return path.resolve(templateDir,filename);
 }
 

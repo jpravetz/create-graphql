@@ -1,20 +1,26 @@
 import 'babel-polyfill';
 
 import program from 'commander';
-
+import Debug  from 'debug';
 import pkg from '../package.json';
 import {
   init,
   generate,
 } from './commands';
-import { verifyYeoman } from './utils_create';
+import {verifyYeoman} from './utils_create';
+
+const debug = Debug('cg:main');
 
 program
   .version(pkg.version);
 
-import Path from 'path';
+let Path = require('path');
+let fs = require('fs');
 
-let templatePath = Path.resolve(__dirname,'../templates','es2015');
+let templateRoot = Path.resolve(__dirname, '../templates')
+let templates = fs.readdirSync(templateRoot);
+let templateDir = 'es2015';
+debug(`Available templates ${JSON.stringify(templates)}`);
 
 program
   .command('init <project>')
@@ -29,7 +35,7 @@ program
 program
   .command('generate <name>')
   .alias('g')
-  .option('-T, --templates <path>', `Path to template files (default: ${templatePath}`, templatePath )
+  .option('-T, --templates <path>', `Select templates from ${templates} (default: ${templateDir})`, templateDir)
   .option('-t, --type', 'Generate a new Type')
   .option('-l, --loader', 'Generate a new Loader')
   .option('-c, --connection', 'Generate a new Connection')
@@ -39,6 +45,8 @@ program
   .action(async (name, options) => {
     await verifyYeoman();
 
+    options.templatePath = Path.resolve(templateRoot, options.templates)
+    debug(`Using templates folder ${options.templatePath}`);
     generate(name, options);
   });
 

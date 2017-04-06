@@ -42,12 +42,9 @@ function parseOptions(opts) {
 }
 
 function generate(name, options) {
+  setTemplateDir(options.templatePath);
+
   // Parse all arguments
-  const templateDir = Path.resolve(process.cwd(),options.templates);
-  setTemplateDir(templateDir);
-
-  console.log(`Set template dir to ${templateDir}`);
-
   const parsedOptions = parseOptions(options);
   // Get only the chose arguments
   const chosenOptions = Object.keys(parsedOptions).filter(opt => !!parsedOptions[opt]);
