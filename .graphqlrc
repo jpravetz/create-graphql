@@ -1,10 +1,10 @@
 {
   "directories": {
-    "source": "tmp/src/test",
-    "connection": "connection",
-    "loader": "loader",
-    "model": "models",
-    "mutation": "mutation",
-    "type": "types"
+    "connection": "test/connection",
+    "loader": "test/loader",
+    "model": "test/models",
+    "mutation": "test/mutation",
+    "type": "test/types",
+    "templates": "test/templates"
   }
 }

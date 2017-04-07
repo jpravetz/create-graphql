@@ -5,9 +5,9 @@ const cmds = {}
 
 const availableOptions = ['type', 'loader', 'connection', 'mutation'];
 
-availableOptions.forEach(opt => {
-  cmds[opt] = require('./' + opt);
-});
+// availableOptions.forEach(opt => {
+//   cmds[opt] = require('./' + opt);
+// });
 
 class Generator {
 
@@ -17,7 +17,7 @@ class Generator {
 
   _parseOptions (opts) {
     // Check if any commands were provided
-    const anyCommandsProvided = false;
+    let anyCommandsProvided = false;
     availableOptions.forEach((cmd) => {
       if (opts[cmd]) {
         anyCommandsProvided = true;
@@ -27,18 +27,19 @@ class Generator {
     // If not, use the default options
     if (!anyCommandsProvided) {
       availableOptions.forEach((cmd) => {
-        options[item] = true;
+        options[cmd] = true;
       });
     }
     return options;
   }
 
   run () {
+    debug( 'Options = %s', JSON.stringify(this._options));
     let putils = new PUtils();
     return putils.getConfig()
-      .then((config) => {
+      .then(() => {
         return putils.getMongoseSchema({
-          model: this.options.name,
+          model: this._options.name,
           withTimestamps: true,
           ref: true,
         });

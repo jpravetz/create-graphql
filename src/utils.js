@@ -1,5 +1,6 @@
 const Path = require('path');
 const process = require('process');
+const fs = require('fs');
 const fsp = require('fs-promise');
 const recast = require('recast');
 const babylon = require('babylon');
@@ -17,21 +18,24 @@ class Utils {
 
   getConfig () {
     this._rootPath = process.cwd();
-    const defaultConfigPath = path.resolve(__dirname, 'graphqlrc.json');
+    const defaultConfigPath = Path.resolve(__dirname, 'graphqlrc.json');
     return fsp.readFile(defaultConfigPath)
       .then((resp) => {
         let config = JSON.parse(resp);
         this._directories = config.directories;
         this._files = config.files;
-        const customConfig = findNearestFile('.graphqlrc');
-        if (customConfig) {
-          this._rootPath = Path.dirname(customConfig);
+        let customConfig = {};
+        const customConfigPath = findNearestFile('.graphqlrc');
+        if (customConfigPath) {
+          this._rootPath = Path.dirname(customConfigPath);
+          return fsp.readFile(customConfigPath)
+            .then((resp) => {
+              customConfig = JSON.parse(resp);
+              Object.assign(this._directories, customConfig.directories);
+            })
         } else {
           this._rootPath = findNearestFile('package.json');
         }
-        Object.assign(this._directories, customConfig ? customConfig.directories : null);
-        Object.assign(this._files, customConfig ? customConfig.files : null);
-        // this._sourceDir = Path.resolve(this._rootPath,this._directories.source);
       });
   }
 
@@ -40,35 +44,34 @@ class Utils {
   }
 
   findModelPath (model) {
-    const modelDir = this.getDirectory('model');
-    let modelPath = Path.resolve(modelDir, model + '.js');
-    return fsp.stat(modelPath)
-      .then((stats) => {
-        if (stats.isFile()) {
-          return modelPath;
+    return new Promise((resolve, reject) => {
+      const modelDir = this.getDirectory('model');
+      let modelPath = Path.resolve(modelDir, model + '.js');
+      fs.stat(modelPath, function (err, stats) {
+        if (!err && stats.isFile()) {
+          resolve(modelPath)
         } else {
           modelPath = Path.resolve(modelDir, model, 'index.js');
-          return fsp.stat(modelPath)
-            .then((stats) => {
-              if (stats.isFile()) {
-                return modelPath;
-              } else {
-                throw new Error(`Model '${model}' definition file not found`);
-              }
-            });
+          fs.stat(modelPath, function (err, stats) {
+            if (!err && stats.isFile()) {
+              resolve(modelPath)
+            } else {
+              reject(new Error(`Model '${model}' schema file not found`));
+            }
+          });
         }
-      })
+      });
+    });
   }
-
 
   getMongoseSchema (options = {}) {
     if (options && options.model) {
       return this.findModelPath(options.model)
         .then((modelPath) => {
-          return getModelCode(modelPath);
+          return Utils.getModelCode(modelPath);
         })
         .then((resp) => {
-          return getSchemaDefinition(modelCode, options.withTimestamps, options.ref);
+          return Utils.getSchemaDefinition(resp, options.withTimestamps, options.ref);
         })
     }
   }
@@ -78,7 +81,7 @@ class Utils {
    * @param modelPath {string} The path of the Mongoose model
    * @returns {string} The code of the Mongoose model
    */
-  getModelCode (modelPath) {
+  static getModelCode (modelPath) {
     return fsp.readFile(modelPath, 'utf8');
   }
 
@@ -159,95 +162,67 @@ class Utils {
   }
 
   static parseFieldToGraphQL (field, ref) {
-    const graphQLField = {
+    let result = {
       name: field.name,
       description: field.description,
       required: !!field.required,
       originalType: field.type,
       resolve: `obj.${field.name}`,
+      type: 'GraphQLString',
+      flowType: 'string'
     };
 
     const name = Utils.uppercaseFirstLetter(field.name);
     const typeFileName = `${name}Type`;
     const loaderFileName = `${name}Loader`;
 
-    switch (field.type) {
-      case 'Number':
-        return {
-          ...graphQLField,
-          type: 'GraphQLInt',
-          flowType: 'number',
-        };
-      case 'Boolean':
-        return {
-          ...graphQLField,
-          type: 'GraphQLBoolean',
-          flowType: 'boolean',
-        };
-      case 'ObjectId':
-        if (ref) {
-          return {
-            ...graphQLField,
-            type: typeFileName,
-            flowType: 'string',
-            resolve: `await ${loaderFileName}.load(user, obj.${field.name})`,
-            resolveArgs: 'async (obj, args, { user })',
-            graphqlType: typeFileName,
-            graphqlLoader: loaderFileName,
-          };
-        }
-
-        return {
-          ...graphQLField,
-          type: 'GraphQLID',
-          flowType: 'string',
-        };
-      case 'Date':
-        return {
-          ...graphQLField,
-          type: 'GraphQLString',
-          flowType: 'string',
-          resolve: `obj.${field.name}.toISOString()`,
-        };
-      default:
-        return {
-          ...graphQLField,
-          type: 'GraphQLString',
-          flowType: 'string',
-        };
+    if (field.type === 'Number') {
+      result.type = 'GraphQLInt';
+      result.flowType = 'number';
+    } else if (field.type === 'Boolean') {
+      result.type = 'GraphQLBoolean';
+      result.flowType = 'boolean';
+    } else if (field.type === 'ObjectId') {
+      if (ref) {
+        result.type = typeFileName;
+        result.resolve = `await ${loaderFileName}.load(user, obj.${field.name})`;
+        result.resolveArgs = 'async (obj, args, { user })';
+        result.graphqlType = typeFileName;
+        result.graphqlLoader = loaderFileName;
+      } else {
+        result.type = 'GraphQLID';
+      }
+    } else if (field.type === 'Date') {
+      result.resolve = `obj.${field.name}.toISOString()`;
     }
+    return result;
   }
 
   static getSchemaFieldsFromAst (node, withTimestamps) {
     const astSchemaFields = node.arguments[0].properties;
 
-    const fields = [];
+    //const fields = [];
+    const fields = {};
     astSchemaFields.forEach((field) => {
       const name = field.key.name;
 
-      const fieldDefinition = {};
+      const fieldDef = { name: name };
 
       if (field.value.type === 'ArrayExpression') {
         return;
       }
 
       field.value.properties.forEach(({ key, value }) => {
-        fieldDefinition[key.name] = value.name || value.value;
+        fieldDef[key.name] = value.name || value.value;
       });
 
-      fields[name] = {
-        name,
-        ...fieldDefinition,
-      };
+      fields[name] = fieldDef;
     });
 
     if (withTimestamps) {
       const astSchemaTimestamp = Utils.getSchemaTimestampsFromAst(node.arguments[1].properties);
 
-      return {
-        ...fields,
-        ...astSchemaTimestamp,
-      };
+      Object.assign(fields, astSchemaFields);
     }
 
     return fields;

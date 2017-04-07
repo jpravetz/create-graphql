@@ -25,6 +25,16 @@ program
   .description('Generate a new file (Type, Loader, Mutation, etc)')
   .parse(process.argv);
 
+let options = {
+  name: program.name,
+  templates: program.templates,
+  type: program.type,
+  loader: program.loader,
+  connection: program.connection,
+  mutation: program.mutation,
+  schema: program.schema
+}
+
 
 let generator = new Generator(options);
 generator.run()

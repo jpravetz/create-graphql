@@ -1,11 +1,11 @@
 {
-  "name": "create-graphql",
+  "name": "gengraphql",
   "description": "Create production-ready GraphQL schema",
   "version": "1.1.16",
   "author": {
     "name": "Jim Pravetz",
-    "email": "lucas.bsilva@outlook.com",
-    "url": "https://github.com/lucasbento"
+    "email": "jpravetz@gmail.com",
+    "url": "https://github.com/jpravetz"
   },
   "bugs": "https://github.com/jpravetz/create-graphql/issues",
   "dependencies": {
@@ -25,9 +25,5 @@
     "url": "https://github.com/jpravetz/create-graphql"
   },
   "scripts": {
-    "build": "npm run clean && babel src -d ./dist --copy-files --ignore *.spec.js",
-    "clean": "rimraf ./dist",
-    "test": "jest",
-    "watch": "babel -w -d ./src --copy-files"
   }
 }
