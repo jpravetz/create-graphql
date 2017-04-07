@@ -1,57 +1,65 @@
-import 'babel-polyfill';
+const Path = require('path');
+const PUtils = require('./utils');
+const debug = require('debug')('cg:generator');
+const cmds = {}
 
-import program from 'commander';
-import Debug  from 'debug';
-import pkg from '../package.json';
-import {
-  init,
-  generate,
-} from './commands';
-import {verifyYeoman} from './utils_create';
+const availableOptions = ['type', 'loader', 'connection', 'mutation'];
 
-const debug = Debug('cg:main');
+availableOptions.forEach(opt => {
+  cmds[opt] = require('./' + opt);
+});
 
-program
-  .version(pkg.version);
+class Generator {
 
-let Path = require('path');
-let fs = require('fs');
+  constructor (options = {}) {
+    this._options = this._parseOptions(options);
+  }
 
-let templateRoot = Path.resolve(__dirname, '../templates')
-let templates = fs.readdirSync(templateRoot);
-let templateDir = 'es2015';
-debug(`Available templates ${JSON.stringify(templates)}`);
+  _parseOptions (opts) {
+    // Check if any commands were provided
+    const anyCommandsProvided = false;
+    availableOptions.forEach((cmd) => {
+      if (opts[cmd]) {
+        anyCommandsProvided = true;
+      }
+    });
+    let options = opts;
+    // If not, use the default options
+    if (!anyCommandsProvided) {
+      availableOptions.forEach((cmd) => {
+        options[item] = true;
+      });
+    }
+    return options;
+  }
 
-program
-  .command('init <project>')
-  .alias('i')
-  .description('Create a new GraphQL project')
-  .action(async (project) => {
-    await verifyYeoman();
+  run () {
+    let putils = new PUtils();
+    return putils.getConfig()
+      .then((config) => {
+        return putils.getMongoseSchema({
+          model: this.options.name,
+          withTimestamps: true,
+          ref: true,
+        });
+      })
+      .then((schema) => {
+        let jobs = [];
+        availableOptions.forEach((cmd) => {
+          if (this._options[cmd]) {
+            const opts = {
+              model: options.name,
+              schema: schema
+            };
+            let job = cmds[cmd](opts);
+            jobs.push(job);
+          }
+        });
+        return Promise.all(jobs);
+      })
+  }
 
-    init(project);
-  });
-
-program
-  .command('generate <name>')
-  .alias('g')
-  .option('-T, --templates <path>', `Select templates from ${templates} (default: ${templateDir})`, templateDir)
-  .option('-t, --type', 'Generate a new Type')
-  .option('-l, --loader', 'Generate a new Loader')
-  .option('-c, --connection', 'Generate a new Connection')
-  .option('-m, --mutation', 'Generate a new Mutation')
-  .option('--schema <modelPath>', 'Generate from a Mongoose Schema')
-  .description('Generate a new file (Type, Loader, Mutation, etc)')
-  .action(async (name, options) => {
-    await verifyYeoman();
-
-    options.templatePath = Path.resolve(templateRoot, options.templates)
-    debug(`Using templates folder ${options.templatePath}`);
-    generate(name, options);
-  });
-
-program.parse(process.argv);
-
-if (process.argv.length <= 2) {
-  program.help();
 }
+
+
+module.exports = Generator;

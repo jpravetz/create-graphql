@@ -1,14 +1,13 @@
 {
   "directories": {
-    "source": "src",
-    "connection": "connection",
-    "loader": "loader",
-    "model": "model",
-    "mutation": "mutation",
-    "mutation_test": "mutation/__tests__",
-    "type": "type",
-    "type_test": "type/__tests__",
-    "interface": "interface"
+    "connection": "src/connection",
+    "loader": "src/loader",
+    "model": "src/model",
+    "mutation": "src/mutation",
+    "mutation_test": "src/mutation/__tests__",
+    "type": "src/type",
+    "type_test": "src/type/__tests__",
+    "interface": "src/interface"
   },
   "files": {
     "schema": "schema"

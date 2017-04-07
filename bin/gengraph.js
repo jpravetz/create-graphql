@@ -3,7 +3,7 @@
 const program = require('commander');
 const debug = require('debug')('gql:main');
 const pkg = require('../package.json');
-const generator = require('./commands/generator');
+const Generator = require('../src/index');
 
 let Path = require('path');
 let fs = require('fs');
@@ -21,11 +21,16 @@ program
   .option('-l, --loader', 'Generate a new Loader')
   .option('-c, --connection', 'Generate a new Connection')
   .option('-m, --mutation', 'Generate a new Mutation')
-  .option('--schema <modelPath>', 'Generate from a Mongoose Schema')
+  .option('--schema', 'Generate from a Mongoose Schema')
   .description('Generate a new file (Type, Loader, Mutation, etc)')
   .parse(process.argv);
 
 
 let generator = new Generator(options);
-generator.run();
+generator.run()
+  .then((resp) => {
+    console.log('Done');
+  }, (err) => {
+    console.log(err);
+  });
 
